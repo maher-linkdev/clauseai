@@ -28,7 +28,11 @@ class _AnalysisSectionState<T> extends State<AnalysisSection<T>> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: ColorsPalette.surfaceLight,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [ColorsPalette.primary.withOpacity(0.1), ColorsPalette.secondary.withOpacity(0.05)],
+        ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: ColorsPalette.grey300),
       ),
@@ -55,7 +59,11 @@ class _AnalysisSectionState<T> extends State<AnalysisSection<T>> {
                   Expanded(
                     child: Text(
                       widget.title,
-                      style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.bold, color: ColorsPalette.textPrimary),
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: ColorsPalette.textPrimary,
+                      ),
                     ),
                   ),
                   Container(
@@ -84,6 +92,12 @@ class _AnalysisSectionState<T> extends State<AnalysisSection<T>> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: _isExpanded ? null : 0,
+            decoration: _isExpanded
+                ? BoxDecoration(
+                    color: ColorsPalette.backgroundDark.withOpacity(0.9),
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                  )
+                : null,
             child: _isExpanded
                 ? Column(
                     children: [

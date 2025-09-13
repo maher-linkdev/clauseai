@@ -4,6 +4,7 @@ import 'package:deal_insights_assistant/src/core/utils/file_validator.dart';
 import 'package:deal_insights_assistant/src/features/analytics/domain/service/analytics_service.dart';
 import 'package:deal_insights_assistant/src/features/home/domain/service/document_analysis_service.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_state.dart';
+import 'package:deal_insights_assistant/src/features/result/presentation/page/result_page.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -137,7 +138,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
     // Navigate to result page with the analysis result
     router.pushNamed(
-      'result',
+      ResultPage.routeName,
       extra: {
         'contractAnalysisResult': contractAnalysisResult,
         'extractedText': extractedText,

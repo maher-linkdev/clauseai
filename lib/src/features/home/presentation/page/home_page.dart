@@ -2,7 +2,6 @@ import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/error_display.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/file_upload_section.dart';
-import 'package:deal_insights_assistant/src/features/home/presentation/component/recent_documents.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/selected_file_display.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/text_input_section.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
@@ -162,9 +161,9 @@ class HomePage extends ConsumerWidget {
                               }
                             },
                           ),
-
+                    //TODO: Add recent documents section
                     // Recent Documents Section
-                    if (isDesktop && !homeState.hasInput) const RecentDocuments(),
+                    // if (isDesktop && !homeState.hasInput) const RecentDocuments(),
                   ],
                 ),
               ],

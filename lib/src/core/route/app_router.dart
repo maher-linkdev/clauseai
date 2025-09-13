@@ -51,7 +51,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        name: 'result',
+        name: ResultPage.routeName,
         path: ResultPage.routeName,
         pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
@@ -79,7 +79,7 @@ class AppRouter {
               extractedText: extractedText,
               fileName: fileName,
             ),
-            name: 'result',
+            name: ResultPage.routeName,
             fadeIn: true,
             transitionDuration: const Duration(milliseconds: 500),
           );
