@@ -48,4 +48,10 @@ class ColorsPalette {
   static const Color risksAccent = Color(0xFFFF5252);
   static const Color paymentAccent = Color(0xFF00BCD4);
   static const Color liabilitiesAccent = Color(0xFFFF6E40);
+
+  // Compatibility aliases for commonly used properties
+  static const Color surface = surfaceLight;
+  static const Color background = backgroundLight;
+  static const Color border = grey300;
+  static const Color accent = secondary;
 }

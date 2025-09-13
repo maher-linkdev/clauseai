@@ -3,6 +3,7 @@ import 'package:deal_insights_assistant/src/features/home/presentation/logic/hom
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class TextInputSection extends ConsumerStatefulWidget {
   const TextInputSection({super.key});
@@ -80,7 +81,7 @@ class _TextInputSectionState extends ConsumerState<TextInputSection> {
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
                 onPressed: homeState.hasSelectedText && !homeState.isProcessing
-                    ? () => homeNotifier.analyzeDocument()
+                    ? () => homeNotifier.analyzeDocument(GoRouter.of(context))
                     : null,
                 icon: homeState.isProcessing
                     ? const SizedBox(

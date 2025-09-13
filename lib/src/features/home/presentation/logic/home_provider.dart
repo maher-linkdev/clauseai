@@ -1,21 +1,25 @@
 import 'dart:typed_data';
 
 import 'package:deal_insights_assistant/src/core/utils/file_validator.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/service/analytics_service.dart';
 import 'package:deal_insights_assistant/src/features/home/domain/service/document_analysis_service.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_state.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Home state provider
 final homeStateProvider = StateNotifierProvider<HomeStateNotifier, HomeState>((ref) {
   final documentService = ref.watch(documentAnalysisServiceProvider);
-  return HomeStateNotifier(documentService);
+  final analyticsService = ref.watch(analyticsServiceProvider);
+  return HomeStateNotifier(documentService, analyticsService);
 });
 
 class HomeStateNotifier extends StateNotifier<HomeState> {
   final DocumentAnalysisService _documentService;
+  final AnalyticsService _analyticsService;
 
-  HomeStateNotifier(this._documentService) : super(const HomeState());
+  HomeStateNotifier(this._documentService, this._analyticsService) : super(const HomeState());
 
   // Update text input
   void updateTextInput(String text) {
@@ -98,11 +102,11 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
     );
   }
 
-  // Analyze document (extract text)
-  Future<void> analyzeDocument() async {
+  // Analyze document (extract text and perform contract analysis)
+  Future<void> analyzeDocument(GoRouter router) async {
     if (!state.hasInput) return;
 
-    //try {
+    //  try {
     state = state.copyWith(uploadStatus: UploadStatus.analyzing, errorMessage: null);
 
     String extractedText = '';
@@ -119,13 +123,33 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
       extractedText = state.selectedText!;
     }
 
-    // Simulate analysis delay
-    await Future.delayed(const Duration(seconds: 1));
+    // Validate text for contract analysis
+    if (!_analyticsService.isValidForAnalysis(extractedText)) {
+      throw Exception(
+        'Document text is too short or invalid for contract analysis. Please provide a more substantial document.',
+      );
+    }
+
+    // Perform contract analysis
+    final contractAnalysisResult = await _analyticsService.analyzeContract(extractedText);
 
     state = state.copyWith(uploadStatus: UploadStatus.completed, extractedText: extractedText, errorMessage: null);
-    //} catch (e) {
-    //state = state.copyWith(uploadStatus: UploadStatus.error, errorMessage: 'Analysis failed: ${e.toString()}');
-    //}
+
+    // Navigate to result page with the analysis result
+    router.pushNamed(
+      'result',
+      extra: {
+        'contractAnalysisResult': contractAnalysisResult,
+        'extractedText': extractedText,
+        'fileName': state.selectedFileName,
+      },
+    );
+    // } catch (e) {
+    //   state = state.copyWith(
+    //     uploadStatus: UploadStatus.error,
+    //     errorMessage: 'Analysis failed: ${e.toString()}'
+    //   );
+    // }
   }
 
   // Reset error state

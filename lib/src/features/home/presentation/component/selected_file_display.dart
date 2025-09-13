@@ -2,6 +2,7 @@ import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SelectedFileDisplay extends ConsumerWidget {
@@ -57,7 +58,7 @@ class SelectedFileDisplay extends ConsumerWidget {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  onPressed: homeState.isProcessing ? null : () => homeNotifier.analyzeDocument(),
+                  onPressed: homeState.isProcessing ? null : () => homeNotifier.analyzeDocument(GoRouter.of(context)),
                   icon: homeState.isProcessing
                       ? const SizedBox(
                           width: 20,

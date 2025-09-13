@@ -45,7 +45,10 @@ dependencies:
   syncfusion_flutter_pdf: ^27.1.48
   docx_to_text: ^1.0.1
   path: ^1.9.0
-
+  firebase_ai: ^3.2.0
+  firebase_app_check: ^0.4.0+1
+  firebase_core: ^4.1.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,8 +56,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
-
-
+  generate: true
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

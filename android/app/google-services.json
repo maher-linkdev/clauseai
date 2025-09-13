@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "969900702891",
+    "project_id": "clauseai-3f7de",
+    "storage_bucket": "clauseai-3f7de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969900702891:android:b737637a2a241848034bee",
+        "android_client_info": {
+          "package_name": "com.example.deal_insights_assistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8DkCT-V5vZ8EcOTOjdFQ3rx1n9vCPgOo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
