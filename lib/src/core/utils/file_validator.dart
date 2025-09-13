@@ -7,8 +7,11 @@ class FileValidator {
   /// Validate file from picker or drop target
   static String? validateFile({required String? fileName, required int fileSize, required Uint8List fileBytes}) {
     if (fileName == null) return "Invalid file (no name)";
+    print("fileName ${fileName}");
 
     final extension = fileName.split('.').last.toLowerCase();
+    print("extension ${extension}");
+
     print("file extension ${extension}");
     if (!allowedExtensions.contains(extension)) {
       return "Unsupported file type: $extension";
