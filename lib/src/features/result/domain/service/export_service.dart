@@ -1,8 +1,7 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -26,7 +25,7 @@ class ExportService {
     String? extractedText,
   }) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       _loggingService.methodEntry('ExportService', 'exportToPdf', {
         'fileName': fileName,
@@ -38,7 +37,7 @@ class ExportService {
       });
 
       _loggingService.info('Starting PDF generation for contract analysis report');
-      
+
       final pdf = pw.Document();
 
       // Load custom font for better typography
@@ -69,10 +68,7 @@ class ExportService {
 
       // Save and open the PDF
       final pdfFileName = 'Contract_Analysis_Report_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      await Printing.layoutPdf(
-        onLayout: (format) async => pdf.save(),
-        name: pdfFileName,
-      );
+      await Printing.layoutPdf(onLayout: (format) async => pdf.save(), name: pdfFileName);
 
       stopwatch.stop();
       _loggingService.performance('PDF Export', stopwatch.elapsed, {
@@ -86,10 +82,15 @@ class ExportService {
     } catch (e, stackTrace) {
       stopwatch.stop();
       _loggingService.error('PDF export failed after ${stopwatch.elapsed.inMilliseconds}ms', e, stackTrace);
-      
+
       // Provide more specific error messages based on error type
       if (e.toString().contains('font')) {
-        _loggingService.businessError('PDF Font Loading', 'Failed to load required fonts for PDF generation', e, stackTrace);
+        _loggingService.businessError(
+          'PDF Font Loading',
+          'Failed to load required fonts for PDF generation',
+          e,
+          stackTrace,
+        );
         throw Exception('Failed to load PDF fonts. Please check your internet connection and try again.');
       } else if (e.toString().contains('layout') || e.toString().contains('printing')) {
         _loggingService.businessError('PDF Layout/Printing', 'Failed to layout or print PDF document', e, stackTrace);
@@ -106,9 +107,7 @@ class ExportService {
     return pw.Container(
       padding: const pw.EdgeInsets.all(20),
       decoration: pw.BoxDecoration(
-        gradient: const pw.LinearGradient(
-          colors: [PdfColor.fromInt(0xFF2563EB), PdfColor.fromInt(0xFF3B82F6)],
-        ),
+        gradient: const pw.LinearGradient(colors: [PdfColor.fromInt(0xFF2563EB), PdfColor.fromInt(0xFF3B82F6)]),
         borderRadius: pw.BorderRadius.circular(12),
       ),
       child: pw.Column(
@@ -116,36 +115,19 @@ class ExportService {
         children: [
           pw.Text(
             AppConstants.appName,
-            style: pw.TextStyle(
-              font: fontBold,
-              fontSize: 24,
-              color: PdfColors.white,
-            ),
+            style: pw.TextStyle(font: fontBold, fontSize: 24, color: PdfColors.white),
           ),
           pw.SizedBox(height: 8),
           pw.Text(
             'Contract Analysis Report',
-            style: pw.TextStyle(
-              font: fontBold,
-              fontSize: 18,
-              color: PdfColors.white,
-            ),
+            style: pw.TextStyle(font: fontBold, fontSize: 18, color: PdfColors.white),
           ),
           pw.SizedBox(height: 4),
-          pw.Text(
-            fileName ?? 'Document Analysis',
-            style: pw.TextStyle(
-              fontSize: 12,
-              color: PdfColors.white,
-            ),
-          ),
+          pw.Text(fileName ?? 'Document Analysis', style: pw.TextStyle(fontSize: 12, color: PdfColors.white)),
           pw.SizedBox(height: 4),
           pw.Text(
             'Generated on ${DateTime.now().toString().split('.')[0]}',
-            style: pw.TextStyle(
-              fontSize: 10,
-              color: PdfColors.white,
-            ),
+            style: pw.TextStyle(fontSize: 10, color: PdfColors.white),
           ),
         ],
       ),
@@ -160,17 +142,11 @@ class ExportService {
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(16),
-      decoration: pw.BoxDecoration(
-        color: PdfColors.grey100,
-        borderRadius: pw.BorderRadius.circular(8),
-      ),
+      decoration: pw.BoxDecoration(color: PdfColors.grey100, borderRadius: pw.BorderRadius.circular(8)),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            'Analysis Summary',
-            style: pw.TextStyle(font: fontBold, fontSize: 16),
-          ),
+          pw.Text('Analysis Summary', style: pw.TextStyle(font: fontBold, fontSize: 16)),
           pw.SizedBox(height: 12),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
@@ -276,17 +252,11 @@ class ExportService {
             padding: const pw.EdgeInsets.all(12),
             decoration: pw.BoxDecoration(
               color: PdfColor.fromInt(0xFF2563EB).shade(0.1),
-              borderRadius: const pw.BorderRadius.only(
-                topLeft: pw.Radius.circular(8),
-                topRight: pw.Radius.circular(8),
-              ),
+              borderRadius: const pw.BorderRadius.only(topLeft: pw.Radius.circular(8), topRight: pw.Radius.circular(8)),
             ),
             child: pw.Row(
               children: [
-                pw.Text(
-                  title,
-                  style: pw.TextStyle(font: fontBold, fontSize: 14),
-                ),
+                pw.Text(title, style: pw.TextStyle(font: fontBold, fontSize: 14)),
                 pw.Spacer(),
                 pw.Container(
                   padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -296,11 +266,7 @@ class ExportService {
                   ),
                   child: pw.Text(
                     items.length.toString(),
-                    style: pw.TextStyle(
-                      font: fontBold,
-                      fontSize: 10,
-                      color: PdfColors.white,
-                    ),
+                    style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.white),
                   ),
                 ),
               ],
@@ -336,7 +302,7 @@ class ExportService {
     // Determine if the item has a confidence property
     bool hasConfidence = false;
     double confidence = 0.0;
-    
+
     // Check if the item has confidence property
     try {
       if (item is Obligation || item is Risk || item is PaymentTerm || item is Liability) {
@@ -370,11 +336,7 @@ class ExportService {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       item.text ?? 'No description available',
-                      style: pw.TextStyle(
-                        font: font,
-                        fontSize: 10,
-                        color: PdfColors.grey800,
-                      ),
+                      style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey800),
                     ),
                   ],
                 ),
@@ -419,11 +381,7 @@ class ExportService {
       ),
       child: pw.Text(
         severityName,
-        style: pw.TextStyle(
-          font: font,
-          fontSize: 8,
-          color: color,
-        ),
+        style: pw.TextStyle(font: font, fontSize: 8, color: color),
       ),
     );
   }
@@ -447,17 +405,10 @@ class ExportService {
     final percentage = (confidence * 100).round();
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: pw.BoxDecoration(
-        color: PdfColors.grey100,
-        borderRadius: pw.BorderRadius.circular(4),
-      ),
+      decoration: pw.BoxDecoration(color: PdfColors.grey100, borderRadius: pw.BorderRadius.circular(4)),
       child: pw.Text(
         '$percentage%',
-        style: pw.TextStyle(
-          font: font,
-          fontSize: 8,
-          color: PdfColors.grey700,
-        ),
+        style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey700),
       ),
     );
   }
@@ -466,18 +417,11 @@ class ExportService {
   pw.Widget _buildFooter(pw.Font font) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(12),
-      decoration: pw.BoxDecoration(
-        color: PdfColors.grey50,
-        borderRadius: pw.BorderRadius.circular(6),
-      ),
+      decoration: pw.BoxDecoration(color: PdfColors.grey50, borderRadius: pw.BorderRadius.circular(6)),
       child: pw.Center(
         child: pw.Text(
           'Generated by ${AppConstants.appName} • ${AppConstants.appPracticalName}',
-          style: pw.TextStyle(
-            font: font,
-            fontSize: 8,
-            color: PdfColors.grey600,
-          ),
+          style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey600),
         ),
       ),
     );
@@ -486,14 +430,14 @@ class ExportService {
   // Helper methods for calculations
   int _getTotalItems(ContractAnalysisResult result) {
     return (result.obligations?.length ?? 0) +
-           (result.risks?.length ?? 0) +
-           (result.paymentTerms?.length ?? 0) +
-           (result.liabilities?.length ?? 0) +
-           (result.serviceLevels?.length ?? 0) +
-           (result.intellectualProperty?.length ?? 0) +
-           (result.securityRequirements?.length ?? 0) +
-           (result.userRequirements?.length ?? 0) +
-           (result.conflictsOrContrasts?.length ?? 0);
+        (result.risks?.length ?? 0) +
+        (result.paymentTerms?.length ?? 0) +
+        (result.liabilities?.length ?? 0) +
+        (result.serviceLevels?.length ?? 0) +
+        (result.intellectualProperty?.length ?? 0) +
+        (result.securityRequirements?.length ?? 0) +
+        (result.userRequirements?.length ?? 0) +
+        (result.conflictsOrContrasts?.length ?? 0);
   }
 
   int _getHighSeverityItems(ContractAnalysisResult result) {
@@ -549,9 +493,9 @@ class ExportService {
       totalConfidence += item.confidence;
       totalItems++;
     });
-    
+
     // Skip items without confidence property:
-    // - serviceLevels, intellectualProperty, securityRequirements, 
+    // - serviceLevels, intellectualProperty, securityRequirements,
     // - userRequirements, conflictsOrContrasts
 
     return totalItems > 0 ? totalConfidence / totalItems : 0.0;

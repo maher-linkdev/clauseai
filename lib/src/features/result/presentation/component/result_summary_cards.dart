@@ -1,10 +1,11 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../../analytics/domain/model/contract_analysis_result.dart';
+import '../../../analytics/domain/model/contract_analysis_result_model.dart';
 
 class ResultSummaryCards extends StatelessWidget {
   final ContractAnalysisResult contractAnalysisResult;

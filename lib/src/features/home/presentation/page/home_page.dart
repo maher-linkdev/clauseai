@@ -1,5 +1,8 @@
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
+import 'package:deal_insights_assistant/src/features/auth/presentation/logic/auth_provider.dart';
+import 'package:deal_insights_assistant/src/features/auth/presentation/logic/current_user_provider.dart';
+import 'package:deal_insights_assistant/src/features/auth/presentation/pages/login_page.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/error_display.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/file_upload_section.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/selected_file_display.dart';
@@ -7,6 +10,7 @@ import 'package:deal_insights_assistant/src/features/home/presentation/component
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -21,25 +25,59 @@ class HomePage extends ConsumerWidget {
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 768;
     final theme = Theme.of(context);
-
+    final authState = ref.watch(authStateProvider);
+    final currentUser = ref.watch(currentUserProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(PhosphorIcons.fileText(PhosphorIconsStyle.duotone), size: 28, color: ColorsPalette.primary),
-            const SizedBox(width: 12),
-            Expanded(child: const Text("${AppConstants.appName}: ${AppConstants.appPracticalName}")),
-          ],
+        title: Text(
+          AppConstants.appName,
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: ColorsPalette.textPrimary),
         ),
         actions: [
           if (isDesktop) const SizedBox(width: 8),
-          TextButton.icon(
-            icon: Icon(PhosphorIcons.signOut(PhosphorIconsStyle.regular), size: 20),
-            label: isDesktop ? const Text('Sign Out') : const SizedBox.shrink(),
-            onPressed: () {
-              // TODO: Implement sign out
-            },
-          ),
+          if (authState.isAuthenticated && currentUser != null)
+            PopupMenuButton<void>(
+              icon: CircleAvatar(
+                radius: 16,
+                backgroundColor: ColorsPalette.primary,
+                backgroundImage: currentUser.photoURL != null ? NetworkImage(currentUser.photoURL!) : null,
+                child: currentUser.photoURL == null
+                    ? Icon(PhosphorIcons.user(PhosphorIconsStyle.regular), size: 16, color: Colors.white)
+                    : null,
+              ),
+              itemBuilder: (context) => <PopupMenuEntry<void>>[
+                PopupMenuItem<void>(
+                  enabled: false,
+                  child: ListTile(
+                    leading: Icon(PhosphorIcons.user(PhosphorIconsStyle.regular), size: 20),
+                    title: Text(currentUser.displayName ?? currentUser.email ?? 'User'),
+                    subtitle: currentUser.email != null ? Text(currentUser.email!) : null,
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem<void>(
+                  child: ListTile(
+                    leading: Icon(PhosphorIcons.signOut(PhosphorIconsStyle.regular), size: 20),
+                    title: const Text('Sign Out'),
+                    onTap: () {
+                      Navigator.of(context).pop(); // closes the popup menu
+                      // Delay the sign-out to ensure popup menu is fully closed
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        ref.read(authStateProvider.notifier).signOut();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            )
+          else
+            TextButton.icon(
+              icon: Icon(PhosphorIcons.signIn(PhosphorIconsStyle.regular), size: 20),
+              label: isDesktop ? const Text('Sign In') : const SizedBox.shrink(),
+              onPressed: () {
+                // Navigation handled by redirect mechanism
+              },
+            ),
           const SizedBox(width: 16),
         ],
       ),

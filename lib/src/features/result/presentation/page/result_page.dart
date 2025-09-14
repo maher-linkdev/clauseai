@@ -1,8 +1,10 @@
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
+import 'package:deal_insights_assistant/src/features/auth/presentation/logic/auth_provider.dart';
+import 'package:deal_insights_assistant/src/features/auth/presentation/logic/current_user_provider.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
-import 'package:deal_insights_assistant/src/features/home/presentation/page/home_page.dart';
 import 'package:deal_insights_assistant/src/features/result/domain/service/export_service.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/analysis_section.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/conflict_item_widget.dart';
@@ -35,11 +37,16 @@ class ResultPage extends ConsumerWidget {
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 768;
     final theme = Theme.of(context);
+    final authState = ref.watch(authStateProvider);
+    final currentUser = ref.watch(currentUserProvider);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
-        ref.read(homeStateProvider.notifier).clearSelection();
-        context.goNamed(HomePage.routeName);
+        // Delay provider modification until after widget tree is built
+        Future.microtask(() {
+          ref.read(homeStateProvider.notifier).clearSelection();
+        });
+        // Navigation handled by redirect mechanism
       },
       child: Scaffold(
         appBar: AppBar(
@@ -68,23 +75,12 @@ class ResultPage extends ConsumerWidget {
               icon: Icon(PhosphorIcons.filePdf(PhosphorIconsStyle.regular), size: 20),
               label: isDesktop ? const Text('Export PDF') : const SizedBox.shrink(),
               onPressed: () async {
-                // try {
                 final exportService = ref.read(exportServiceProvider);
                 await exportService.exportToPdf(
                   analysisResult: contractAnalysisResult,
                   fileName: fileName,
                   extractedText: extractedText,
                 );
-                // } catch (e) {
-                //   if (context.mounted) {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       SnackBar(
-                //         content: Text('Failed to export PDF: ${e.toString()}'),
-                //         backgroundColor: ColorsPalette.error,
-                //       ),
-                //     );
-                //   }
-                //}
               },
             ),
             const SizedBox(width: 8),
@@ -92,10 +88,57 @@ class ResultPage extends ConsumerWidget {
               icon: Icon(PhosphorIcons.house(PhosphorIconsStyle.regular), size: 20),
               label: isDesktop ? const Text('New Analysis') : const SizedBox.shrink(),
               onPressed: () {
-                ref.read(homeStateProvider.notifier).clearSelection();
-                context.goNamed(HomePage.routeName);
+                Future.microtask(() {
+                  ref.read(homeStateProvider.notifier).clearSelection();
+                  Navigator.of(context).pop();
+                });
+                // Navigation handled by redirect mechanism
               },
             ),
+            const SizedBox(width: 8),
+            if (authState.isAuthenticated && currentUser != null)
+              PopupMenuButton<void>(
+                icon: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: ColorsPalette.primary,
+                  backgroundImage: currentUser.photoURL != null ? NetworkImage(currentUser.photoURL!) : null,
+                  child: currentUser.photoURL == null
+                      ? Icon(PhosphorIcons.user(PhosphorIconsStyle.regular), size: 16, color: Colors.white)
+                      : null,
+                ),
+                itemBuilder: (context) => <PopupMenuEntry<void>>[
+                  PopupMenuItem<void>(
+                    enabled: false,
+                    child: ListTile(
+                      leading: Icon(PhosphorIcons.user(PhosphorIconsStyle.regular), size: 20),
+                      title: Text(currentUser.displayName ?? currentUser.email ?? 'User'),
+                      subtitle: currentUser.email != null ? Text(currentUser.email!) : null,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<void>(
+                    child: ListTile(
+                      leading: Icon(PhosphorIcons.signOut(PhosphorIconsStyle.regular), size: 20),
+                      title: const Text('Sign Out'),
+                      onTap: () {
+                        Navigator.of(context).pop(); // closes the popup menu
+                        // Delay the sign-out to ensure popup menu is fully closed
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          ref.read(authStateProvider.notifier).signOut();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              )
+            else
+              TextButton.icon(
+                icon: Icon(PhosphorIcons.signIn(PhosphorIconsStyle.regular), size: 20),
+                label: isDesktop ? const Text('Sign In') : const SizedBox.shrink(),
+                onPressed: () {
+                  // Navigation handled by redirect mechanism
+                },
+              ),
             const SizedBox(width: 16),
           ],
         ),
@@ -128,7 +171,7 @@ class ResultPage extends ConsumerWidget {
 
                       // Analysis Sections
                       if (contractAnalysisResult.obligations?.isNotEmpty == true)
-                        AnalysisSection<Obligation>(
+                        AnalysisSection<ObligationEntity>(
                           title: 'Obligations',
                           icon: PhosphorIcons.userCheck(),
                           items: contractAnalysisResult.obligations!,
@@ -136,7 +179,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.risks?.isNotEmpty == true)
-                        AnalysisSection<Risk>(
+                        AnalysisSection<RiskEntity>(
                           title: 'Risks',
                           icon: PhosphorIcons.warning(),
                           items: contractAnalysisResult.risks!,
@@ -144,7 +187,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.paymentTerms?.isNotEmpty == true)
-                        AnalysisSection<PaymentTerm>(
+                        AnalysisSection<PaymentTermEntity>(
                           title: 'Payment Terms',
                           icon: PhosphorIcons.creditCard(),
                           items: contractAnalysisResult.paymentTerms!,
@@ -152,7 +195,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.liabilities?.isNotEmpty == true)
-                        AnalysisSection<Liability>(
+                        AnalysisSection<LiabilityEntity>(
                           title: 'Liabilities',
                           icon: PhosphorIcons.shield(),
                           items: contractAnalysisResult.liabilities!,
@@ -160,7 +203,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.serviceLevels?.isNotEmpty == true)
-                        AnalysisSection<ServiceLevel>(
+                        AnalysisSection<ServiceLevelEntity>(
                           title: 'Service Levels',
                           icon: PhosphorIcons.gauge(),
                           items: contractAnalysisResult.serviceLevels!,
@@ -168,7 +211,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.intellectualProperty?.isNotEmpty == true)
-                        AnalysisSection<IntellectualProperty>(
+                        AnalysisSection<IntellectualPropertyEntity>(
                           title: 'Intellectual Property',
                           icon: PhosphorIcons.lightbulb(),
                           items: contractAnalysisResult.intellectualProperty!,
@@ -176,7 +219,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.securityRequirements?.isNotEmpty == true)
-                        AnalysisSection<SecurityRequirement>(
+                        AnalysisSection<SecurityRequirementEntity>(
                           title: 'Security Requirements',
                           icon: PhosphorIcons.lock(),
                           items: contractAnalysisResult.securityRequirements!,
@@ -184,7 +227,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.userRequirements?.isNotEmpty == true)
-                        AnalysisSection<UserRequirement>(
+                        AnalysisSection<UserRequirementEntity>(
                           title: 'User Requirements',
                           icon: PhosphorIcons.user(),
                           items: contractAnalysisResult.userRequirements!,
@@ -192,7 +235,7 @@ class ResultPage extends ConsumerWidget {
                         ),
 
                       if (contractAnalysisResult.conflictsOrContrasts?.isNotEmpty == true)
-                        AnalysisSection<ConflictOrContrast>(
+                        AnalysisSection<ConflictOrContrastEntity>(
                           title: 'Conflicts & Contrasts',
                           icon: PhosphorIcons.warning(),
                           items: contractAnalysisResult.conflictsOrContrasts!,

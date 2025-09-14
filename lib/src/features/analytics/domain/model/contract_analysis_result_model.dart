@@ -1,27 +1,26 @@
+import 'package:deal_insights_assistant/src/core/enum/cap_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/ownership_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/risk_category_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/user_requirements_category.dart';
 import 'package:flutter/foundation.dart';
 
-@immutable
-class ContractAnalysisResult {
-  final List<Obligation>? obligations;
-  final List<PaymentTerm>? paymentTerms;
-  final List<Liability>? liabilities;
-  final List<Risk>? risks;
-  final List<ServiceLevel>? serviceLevels;
-  final List<IntellectualProperty>? intellectualProperty;
-  final List<SecurityRequirement>? securityRequirements;
-  final List<UserRequirement>? userRequirements;
-  final List<ConflictOrContrast>? conflictsOrContrasts;
+import '../entity/contract_analysis_result_entity.dart';
 
+@immutable
+class ContractAnalysisResult extends ContractAnalysisResultEntity {
   const ContractAnalysisResult({
-    this.obligations,
-    this.paymentTerms,
-    this.liabilities,
-    this.risks,
-    this.serviceLevels,
-    this.intellectualProperty,
-    this.securityRequirements,
-    this.userRequirements,
-    this.conflictsOrContrasts,
+    super.obligations,
+    super.paymentTerms,
+    super.liabilities,
+    super.risks,
+    super.serviceLevels,
+    super.intellectualProperty,
+    super.securityRequirements,
+    super.userRequirements,
+    super.conflictsOrContrasts,
   });
 
   factory ContractAnalysisResult.fromJson(Map<String, dynamic> json) {
@@ -35,9 +34,7 @@ class ContractAnalysisResult {
       liabilities: json['liabilities'] != null
           ? (json['liabilities'] as List).map((e) => Liability.fromJson(e)).toList()
           : null,
-      risks: json['risks'] != null
-          ? (json['risks'] as List).map((e) => Risk.fromJson(e)).toList()
-          : null,
+      risks: json['risks'] != null ? (json['risks'] as List).map((e) => Risk.fromJson(e)).toList() : null,
       serviceLevels: json['service_levels'] != null
           ? (json['service_levels'] as List).map((e) => ServiceLevel.fromJson(e)).toList()
           : null,
@@ -58,47 +55,66 @@ class ContractAnalysisResult {
 
   Map<String, dynamic> toJson() {
     return {
-      'obligations': obligations?.map((e) => e.toJson()).toList(),
-      'payment_terms': paymentTerms?.map((e) => e.toJson()).toList(),
-      'liabilities': liabilities?.map((e) => e.toJson()).toList(),
-      'risks': risks?.map((e) => e.toJson()).toList(),
-      'service_levels': serviceLevels?.map((e) => e.toJson()).toList(),
-      'intellectual_property': intellectualProperty?.map((e) => e.toJson()).toList(),
-      'security_requirements': securityRequirements?.map((e) => e.toJson()).toList(),
-      'user_requirements': userRequirements?.map((e) => e.toJson()).toList(),
-      'conflicts_or_contrasts': conflictsOrContrasts?.map((e) => e.toJson()).toList(),
+      'obligations': obligations?.map((e) => (e as Obligation).toJson()).toList(),
+      'payment_terms': paymentTerms?.map((e) => (e as PaymentTerm).toJson()).toList(),
+      'liabilities': liabilities?.map((e) => (e as Liability).toJson()).toList(),
+      'risks': risks?.map((e) => (e as Risk).toJson()).toList(),
+      'service_levels': serviceLevels?.map((e) => (e as ServiceLevel).toJson()).toList(),
+      'intellectual_property': intellectualProperty?.map((e) => (e as IntellectualProperty).toJson()).toList(),
+      'security_requirements': securityRequirements?.map((e) => (e as SecurityRequirement).toJson()).toList(),
+      'user_requirements': userRequirements?.map((e) => (e as UserRequirement).toJson()).toList(),
+      'conflicts_or_contrasts': conflictsOrContrasts?.map((e) => (e as ConflictOrContrast).toJson()).toList(),
     };
+  }
+
+  ContractAnalysisResultEntity toEntity() {
+    return ContractAnalysisResultEntity(
+      obligations: obligations,
+      paymentTerms: paymentTerms,
+      liabilities: liabilities,
+      risks: risks,
+      serviceLevels: serviceLevels,
+      intellectualProperty: intellectualProperty,
+      securityRequirements: securityRequirements,
+      userRequirements: userRequirements,
+      conflictsOrContrasts: conflictsOrContrasts,
+    );
+  }
+
+  @override
+  ContractAnalysisResult copyWith({
+    List<ObligationEntity>? obligations,
+    List<PaymentTermEntity>? paymentTerms,
+    List<LiabilityEntity>? liabilities,
+    List<RiskEntity>? risks,
+    List<ServiceLevelEntity>? serviceLevels,
+    List<IntellectualPropertyEntity>? intellectualProperty,
+    List<SecurityRequirementEntity>? securityRequirements,
+    List<UserRequirementEntity>? userRequirements,
+    List<ConflictOrContrastEntity>? conflictsOrContrasts,
+  }) {
+    return ContractAnalysisResult(
+      obligations: obligations ?? this.obligations,
+      paymentTerms: paymentTerms ?? this.paymentTerms,
+      liabilities: liabilities ?? this.liabilities,
+      risks: risks ?? this.risks,
+      serviceLevels: serviceLevels ?? this.serviceLevels,
+      intellectualProperty: intellectualProperty ?? this.intellectualProperty,
+      securityRequirements: securityRequirements ?? this.securityRequirements,
+      userRequirements: userRequirements ?? this.userRequirements,
+      conflictsOrContrasts: conflictsOrContrasts ?? this.conflictsOrContrasts,
+    );
   }
 }
 
-enum Severity { low, medium, high, critical }
-
-enum Likelihood { low, medium, high }
-
-enum CapType { capped, uncapped, excluded }
-
-enum Ownership { client, vendor, shared }
-
-enum RiskCategory { legal, financial, operational, compliance, other }
-
-enum SecurityType { dataProtection, compliance, accessControl, audit, other }
-
-enum UserRequirementCategory { functional, nonFunctional, compliance, integration, other }
-
 @immutable
-class Obligation {
-  final String text;
-  final String party;
-  final Severity severity;
-  final String? timeframe;
-  final double confidence;
-
+class Obligation extends ObligationEntity {
   const Obligation({
-    required this.text,
-    required this.party,
-    required this.severity,
-    this.timeframe,
-    required this.confidence,
+    required super.text,
+    required super.party,
+    required super.severity,
+    super.timeframe,
+    required super.confidence,
   });
 
   factory Obligation.fromJson(Map<String, dynamic> json) {
@@ -120,24 +136,28 @@ class Obligation {
       'confidence': confidence,
     };
   }
+
+  @override
+  Obligation copyWith({String? text, String? party, Severity? severity, String? timeframe, double? confidence}) {
+    return Obligation(
+      text: text ?? this.text,
+      party: party ?? this.party,
+      severity: severity ?? this.severity,
+      timeframe: timeframe ?? this.timeframe,
+      confidence: confidence ?? this.confidence,
+    );
+  }
 }
 
 @immutable
-class PaymentTerm {
-  final String text;
-  final double? amount;
-  final String? currency;
-  final int? dueInDays;
-  final Severity severity;
-  final double confidence;
-
+class PaymentTerm extends PaymentTermEntity {
   const PaymentTerm({
-    required this.text,
-    this.amount,
-    this.currency,
-    this.dueInDays,
-    required this.severity,
-    required this.confidence,
+    required super.text,
+    super.amount,
+    super.currency,
+    super.dueInDays,
+    required super.severity,
+    required super.confidence,
   });
 
   factory PaymentTerm.fromJson(Map<String, dynamic> json) {
@@ -161,26 +181,37 @@ class PaymentTerm {
       'confidence': confidence,
     };
   }
+
+  @override
+  PaymentTerm copyWith({
+    String? text,
+    double? amount,
+    String? currency,
+    int? dueInDays,
+    Severity? severity,
+    double? confidence,
+  }) {
+    return PaymentTerm(
+      text: text ?? this.text,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      dueInDays: dueInDays ?? this.dueInDays,
+      severity: severity ?? this.severity,
+      confidence: confidence ?? this.confidence,
+    );
+  }
 }
 
 @immutable
-class Liability {
-  final String text;
-  final String party;
-  final CapType capType;
-  final String? capValue;
-  final List<String> excludedDamages;
-  final Severity severity;
-  final double confidence;
-
+class Liability extends LiabilityEntity {
   const Liability({
-    required this.text,
-    required this.party,
-    required this.capType,
-    this.capValue,
-    required this.excludedDamages,
-    required this.severity,
-    required this.confidence,
+    required super.text,
+    required super.party,
+    required super.capType,
+    super.capValue,
+    required super.excludedDamages,
+    required super.severity,
+    required super.confidence,
   });
 
   factory Liability.fromJson(Map<String, dynamic> json) {
@@ -206,24 +237,38 @@ class Liability {
       'confidence': confidence,
     };
   }
+
+  @override
+  Liability copyWith({
+    String? text,
+    String? party,
+    CapType? capType,
+    String? capValue,
+    List<String>? excludedDamages,
+    Severity? severity,
+    double? confidence,
+  }) {
+    return Liability(
+      text: text ?? this.text,
+      party: party ?? this.party,
+      capType: capType ?? this.capType,
+      capValue: capValue ?? this.capValue,
+      excludedDamages: excludedDamages ?? this.excludedDamages,
+      severity: severity ?? this.severity,
+      confidence: confidence ?? this.confidence,
+    );
+  }
 }
 
 @immutable
-class Risk {
-  final String text;
-  final Severity severity;
-  final Likelihood likelihood;
-  final RiskCategory category;
-  final double confidence;
-  final int riskScore;
-
+class Risk extends RiskEntity {
   const Risk({
-    required this.text,
-    required this.severity,
-    required this.likelihood,
-    required this.category,
-    required this.confidence,
-    required this.riskScore,
+    required super.text,
+    required super.severity,
+    required super.likelihood,
+    required super.category,
+    required super.confidence,
+    required super.riskScore,
   });
 
   factory Risk.fromJson(Map<String, dynamic> json) {
@@ -247,21 +292,30 @@ class Risk {
       'risk_score': riskScore,
     };
   }
+
+  @override
+  Risk copyWith({
+    String? text,
+    Severity? severity,
+    Likelihood? likelihood,
+    RiskCategory? category,
+    double? confidence,
+    int? riskScore,
+  }) {
+    return Risk(
+      text: text ?? this.text,
+      severity: severity ?? this.severity,
+      likelihood: likelihood ?? this.likelihood,
+      category: category ?? this.category,
+      confidence: confidence ?? this.confidence,
+      riskScore: riskScore ?? this.riskScore,
+    );
+  }
 }
 
 @immutable
-class ServiceLevel {
-  final String text;
-  final String metric;
-  final String target;
-  final Severity severity;
-
-  const ServiceLevel({
-    required this.text,
-    required this.metric,
-    required this.target,
-    required this.severity,
-  });
+class ServiceLevel extends ServiceLevelEntity {
+  const ServiceLevel({required super.text, required super.metric, required super.target, required super.severity});
 
   factory ServiceLevel.fromJson(Map<String, dynamic> json) {
     return ServiceLevel(
@@ -273,26 +327,23 @@ class ServiceLevel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'metric': metric,
-      'target': target,
-      'severity': severity.name.toUpperCase(),
-    };
+    return {'text': text, 'metric': metric, 'target': target, 'severity': severity.name.toUpperCase()};
+  }
+
+  @override
+  ServiceLevel copyWith({String? text, String? metric, String? target, Severity? severity}) {
+    return ServiceLevel(
+      text: text ?? this.text,
+      metric: metric ?? this.metric,
+      target: target ?? this.target,
+      severity: severity ?? this.severity,
+    );
   }
 }
 
 @immutable
-class IntellectualProperty {
-  final String text;
-  final Ownership ownership;
-  final Severity severity;
-
-  const IntellectualProperty({
-    required this.text,
-    required this.ownership,
-    required this.severity,
-  });
+class IntellectualProperty extends IntellectualPropertyEntity {
+  const IntellectualProperty({required super.text, required super.ownership, required super.severity});
 
   factory IntellectualProperty.fromJson(Map<String, dynamic> json) {
     return IntellectualProperty(
@@ -303,25 +354,22 @@ class IntellectualProperty {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'ownership': ownership.name.toUpperCase(),
-      'severity': severity.name.toUpperCase(),
-    };
+    return {'text': text, 'ownership': ownership.name.toUpperCase(), 'severity': severity.name.toUpperCase()};
+  }
+
+  @override
+  IntellectualProperty copyWith({String? text, Ownership? ownership, Severity? severity}) {
+    return IntellectualProperty(
+      text: text ?? this.text,
+      ownership: ownership ?? this.ownership,
+      severity: severity ?? this.severity,
+    );
   }
 }
 
 @immutable
-class SecurityRequirement {
-  final String text;
-  final SecurityType type;
-  final Severity severity;
-
-  const SecurityRequirement({
-    required this.text,
-    required this.type,
-    required this.severity,
-  });
+class SecurityRequirement extends SecurityRequirementEntity {
+  const SecurityRequirement({required super.text, required super.type, required super.severity});
 
   factory SecurityRequirement.fromJson(Map<String, dynamic> json) {
     return SecurityRequirement(
@@ -332,25 +380,18 @@ class SecurityRequirement {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'type': _securityTypeToString(type),
-      'severity': severity.name.toUpperCase(),
-    };
+    return {'text': text, 'type': _securityTypeToString(type), 'severity': severity.name.toUpperCase()};
+  }
+
+  @override
+  SecurityRequirement copyWith({String? text, SecurityType? type, Severity? severity}) {
+    return SecurityRequirement(text: text ?? this.text, type: type ?? this.type, severity: severity ?? this.severity);
   }
 }
 
 @immutable
-class UserRequirement {
-  final String text;
-  final UserRequirementCategory category;
-  final Severity severity;
-
-  const UserRequirement({
-    required this.text,
-    required this.category,
-    required this.severity,
-  });
+class UserRequirement extends UserRequirementEntity {
+  const UserRequirement({required super.text, required super.category, required super.severity});
 
   factory UserRequirement.fromJson(Map<String, dynamic> json) {
     return UserRequirement(
@@ -367,19 +408,20 @@ class UserRequirement {
       'severity': severity.name.toUpperCase(),
     };
   }
+
+  @override
+  UserRequirement copyWith({String? text, UserRequirementCategory? category, Severity? severity}) {
+    return UserRequirement(
+      text: text ?? this.text,
+      category: category ?? this.category,
+      severity: severity ?? this.severity,
+    );
+  }
 }
 
 @immutable
-class ConflictOrContrast {
-  final String text;
-  final String? conflictWith;
-  final Severity severity;
-
-  const ConflictOrContrast({
-    required this.text,
-    this.conflictWith,
-    required this.severity,
-  });
+class ConflictOrContrast extends ConflictOrContrastEntity {
+  const ConflictOrContrast({required super.text, super.conflictWith, required super.severity});
 
   factory ConflictOrContrast.fromJson(Map<String, dynamic> json) {
     return ConflictOrContrast(
@@ -390,11 +432,16 @@ class ConflictOrContrast {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'conflict_with': conflictWith,
-      'severity': severity.name.toUpperCase(),
-    };
+    return {'text': text, 'conflict_with': conflictWith, 'severity': severity.name.toUpperCase()};
+  }
+
+  @override
+  ConflictOrContrast copyWith({String? text, String? conflictWith, Severity? severity}) {
+    return ConflictOrContrast(
+      text: text ?? this.text,
+      conflictWith: conflictWith ?? this.conflictWith,
+      severity: severity ?? this.severity,
+    );
   }
 }
 

@@ -1,12 +1,12 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/animated_circular_percentage.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/severity_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ObligationItemWidget extends StatelessWidget {
-  final Obligation obligation;
+  final ObligationEntity obligation;
 
   const ObligationItemWidget({super.key, required this.obligation});
 

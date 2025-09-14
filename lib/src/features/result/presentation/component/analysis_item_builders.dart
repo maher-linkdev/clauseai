@@ -1,5 +1,10 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/core/enum/cap_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/ownership_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/user_requirements_category.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/severity_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

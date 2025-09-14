@@ -1,16 +1,14 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/core/enum/ownership_enum.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/severity_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class IntellectualPropertyItemWidget extends StatelessWidget {
-  final IntellectualProperty intellectualProperty;
+  final IntellectualPropertyEntity intellectualProperty;
 
-  const IntellectualPropertyItemWidget({
-    super.key,
-    required this.intellectualProperty,
-  });
+  const IntellectualPropertyItemWidget({super.key, required this.intellectualProperty});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +37,10 @@ class IntellectualPropertyItemWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(intellectualProperty.text, style: GoogleFonts.lato(fontSize: 14, color: ColorsPalette.textSecondary, height: 1.4)),
+        Text(
+          intellectualProperty.text,
+          style: GoogleFonts.lato(fontSize: 14, color: ColorsPalette.textSecondary, height: 1.4),
+        ),
       ],
     );
   }

@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:deal_insights_assistant/src/core/enum/cap_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/risk_category_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/core/utils/strings_util.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../model/contract_analysis_result.dart';
+import '../model/contract_analysis_result_model.dart';
 
 // Service provider
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {

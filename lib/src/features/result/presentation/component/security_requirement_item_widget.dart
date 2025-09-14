@@ -1,16 +1,14 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
+import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:deal_insights_assistant/src/features/result/presentation/component/severity_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SecurityRequirementItemWidget extends StatelessWidget {
-  final SecurityRequirement securityRequirement;
+  final SecurityRequirementEntity securityRequirement;
 
-  const SecurityRequirementItemWidget({
-    super.key,
-    required this.securityRequirement,
-  });
+  const SecurityRequirementItemWidget({super.key, required this.securityRequirement});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +33,10 @@ class SecurityRequirementItemWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(securityRequirement.text, style: GoogleFonts.lato(fontSize: 14, color: ColorsPalette.textSecondary, height: 1.4)),
+        Text(
+          securityRequirement.text,
+          style: GoogleFonts.lato(fontSize: 14, color: ColorsPalette.textSecondary, height: 1.4),
+        ),
       ],
     );
   }

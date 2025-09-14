@@ -1,16 +1,12 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../analytics/domain/model/contract_analysis_result.dart';
 
 class SeverityBadge extends StatelessWidget {
   final Severity severity;
 
-  const SeverityBadge({
-    super.key,
-    required this.severity,
-  });
+  const SeverityBadge({super.key, required this.severity});
 
   @override
   Widget build(BuildContext context) {
@@ -19,18 +15,11 @@ class SeverityBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: _getSeverityColor(severity).withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: _getSeverityColor(severity).withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: _getSeverityColor(severity).withOpacity(0.3), width: 1),
       ),
       child: Text(
         severity.name.toUpperCase(),
-        style: GoogleFonts.lato(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: _getSeverityColor(severity),
-        ),
+        style: GoogleFonts.lato(fontSize: 10, fontWeight: FontWeight.w600, color: _getSeverityColor(severity)),
       ),
     );
   }
