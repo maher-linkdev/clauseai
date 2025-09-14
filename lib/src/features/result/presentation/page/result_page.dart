@@ -1,7 +1,7 @@
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
+import 'package:deal_insights_assistant/src/features/analytics/data/model/contract_analysis_result_model.dart';
 import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
 import 'package:deal_insights_assistant/src/features/auth/presentation/logic/auth_provider.dart';
 import 'package:deal_insights_assistant/src/features/auth/presentation/logic/current_user_provider.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
@@ -26,7 +26,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 class ResultPage extends ConsumerWidget {
   static const routeName = '/result';
 
-  final ContractAnalysisResult contractAnalysisResult;
+  final ContractAnalysisResultModel contractAnalysisResult;
   final String extractedText;
   final String? fileName;
 

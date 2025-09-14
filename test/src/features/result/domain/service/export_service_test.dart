@@ -1,16 +1,16 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:deal_insights_assistant/src/features/result/domain/service/export_service.dart';
-import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
-import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
-import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/cap_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/ownership_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/risk_category_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
+import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/user_requirements_category.dart';
+import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
+import 'package:deal_insights_assistant/src/features/analytics/data/model/contract_analysis_result_model.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
+import 'package:deal_insights_assistant/src/features/result/domain/service/export_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 // Mock class for LoggingService
 class MockLoggingService extends Mock implements LoggingService {}
@@ -19,14 +19,14 @@ void main() {
   group('ExportService', () {
     late MockLoggingService mockLoggingService;
     late ExportService exportService;
-    late ContractAnalysisResult testAnalysisResult;
+    late ContractAnalysisResultModel testAnalysisResult;
 
     setUp(() {
       mockLoggingService = MockLoggingService();
       exportService = ExportService(mockLoggingService);
 
       // Create test data
-      testAnalysisResult = ContractAnalysisResult(
+      testAnalysisResult = ContractAnalysisResultModel(
         obligations: [
           const ObligationEntity(
             text: 'Test obligation',
@@ -68,19 +68,10 @@ void main() {
           ),
         ],
         serviceLevels: [
-          const ServiceLevelEntity(
-            text: '99.9% uptime',
-            metric: 'uptime',
-            target: '99.9%',
-            severity: Severity.medium,
-          ),
+          const ServiceLevelEntity(text: '99.9% uptime', metric: 'uptime', target: '99.9%', severity: Severity.medium),
         ],
         intellectualProperty: [
-          const IntellectualPropertyEntity(
-            text: 'IP ownership',
-            ownership: Ownership.client,
-            severity: Severity.low,
-          ),
+          const IntellectualPropertyEntity(text: 'IP ownership', ownership: Ownership.client, severity: Severity.low),
         ],
         securityRequirements: [
           const SecurityRequirementEntity(
@@ -97,11 +88,7 @@ void main() {
           ),
         ],
         conflictsOrContrasts: [
-          const ConflictOrContrastEntity(
-            text: 'Conflicting terms',
-            conflictWith: 'Section 5',
-            severity: Severity.high,
-          ),
+          const ConflictOrContrastEntity(text: 'Conflicting terms', conflictWith: 'Section 5', severity: Severity.high),
         ],
       );
     });
@@ -123,21 +110,16 @@ void main() {
       });
 
       test('should handle empty analysis result', () {
-        final emptyResult = ContractAnalysisResult();
+        final emptyResult = ContractAnalysisResultModel();
         expect(emptyResult.obligations, isNull);
         expect(emptyResult.risks, isNull);
         expect(emptyResult.paymentTerms, isNull);
       });
 
       test('should handle partial analysis result', () {
-        final partialResult = ContractAnalysisResult(
+        final partialResult = ContractAnalysisResultModel(
           obligations: [
-            const ObligationEntity(
-              text: 'Test obligation',
-              party: 'Party',
-              severity: Severity.low,
-              confidence: 0.5,
-            ),
+            const ObligationEntity(text: 'Test obligation', party: 'Party', severity: Severity.low, confidence: 0.5),
           ],
           risks: null,
           paymentTerms: null,
@@ -157,20 +139,10 @@ void main() {
       });
 
       test('should handle mixed severity levels', () {
-        final mixedResult = ContractAnalysisResult(
+        final mixedResult = ContractAnalysisResultModel(
           obligations: [
-            const ObligationEntity(
-              text: 'High obligation',
-              party: 'Party',
-              severity: Severity.high,
-              confidence: 0.8,
-            ),
-            const ObligationEntity(
-              text: 'Low obligation',
-              party: 'Party',
-              severity: Severity.low,
-              confidence: 0.5,
-            ),
+            const ObligationEntity(text: 'High obligation', party: 'Party', severity: Severity.high, confidence: 0.8),
+            const ObligationEntity(text: 'Low obligation', party: 'Party', severity: Severity.low, confidence: 0.5),
           ],
         );
         expect(mixedResult.obligations?.length, equals(2));
@@ -189,22 +161,12 @@ void main() {
       });
 
       test('should handle items with different confidence types', () {
-        final resultWithConfidence = ContractAnalysisResult(
+        final resultWithConfidence = ContractAnalysisResultModel(
           obligations: [
-            const ObligationEntity(
-              text: 'Test obligation',
-              party: 'Party',
-              severity: Severity.medium,
-              confidence: 0.8,
-            ),
+            const ObligationEntity(text: 'Test obligation', party: 'Party', severity: Severity.medium, confidence: 0.8),
           ],
           serviceLevels: [
-            const ServiceLevelEntity(
-              text: 'Service level',
-              metric: 'uptime',
-              target: '99%',
-              severity: Severity.low,
-            ),
+            const ServiceLevelEntity(text: 'Service level', metric: 'uptime', target: '99%', severity: Severity.low),
           ],
         );
         expect(resultWithConfidence.obligations?.first.confidence, equals(0.8));
@@ -213,20 +175,10 @@ void main() {
       });
 
       test('should handle confidence edge cases', () {
-        final edgeCaseResult = ContractAnalysisResult(
+        final edgeCaseResult = ContractAnalysisResultModel(
           obligations: [
-            const ObligationEntity(
-              text: 'Zero confidence',
-              party: 'Party',
-              severity: Severity.low,
-              confidence: 0.0,
-            ),
-            const ObligationEntity(
-              text: 'Max confidence',
-              party: 'Party',
-              severity: Severity.high,
-              confidence: 1.0,
-            ),
+            const ObligationEntity(text: 'Zero confidence', party: 'Party', severity: Severity.low, confidence: 0.0),
+            const ObligationEntity(text: 'Max confidence', party: 'Party', severity: Severity.high, confidence: 1.0),
           ],
         );
         expect(edgeCaseResult.obligations?.first.confidence, equals(0.0));
@@ -253,10 +205,10 @@ void main() {
         // Note: This test would require mocking the PDF generation libraries
         // which is complex. For now, we verify the service can be instantiated
         // and the helper methods work correctly.
-        
+
         // Verify logging service is used
         expect(exportService, isA<ExportService>());
-        
+
         // The actual PDF export test would require extensive mocking of:
         // - PdfGoogleFonts
         // - pw.Document
@@ -269,12 +221,12 @@ void main() {
     group('Error Handling', () {
       test('should handle null analysis result gracefully', () {
         // Test that service can handle minimal data without crashing
-        final minimalResult = ContractAnalysisResult();
-        
+        final minimalResult = ContractAnalysisResultModel();
+
         expect(minimalResult.obligations, isNull);
         expect(minimalResult.risks, isNull);
         expect(minimalResult.paymentTerms, isNull);
-        
+
         // Service should still be instantiable with empty data
         expect(() => ExportService(mockLoggingService), returnsNormally);
       });
@@ -283,7 +235,7 @@ void main() {
         // Test service creation with fresh mock
         final freshMock = MockLoggingService();
         expect(() => ExportService(freshMock), returnsNormally);
-        
+
         // Test service creation with existing mock
         expect(() => ExportService(mockLoggingService), returnsNormally);
       });
@@ -292,7 +244,7 @@ void main() {
     group('Data Integrity', () {
       test('should have consistent test data structure', () {
         // Verify test data integrity
-        expect(testAnalysisResult, isA<ContractAnalysisResult>());
+        expect(testAnalysisResult, isA<ContractAnalysisResultModel>());
         expect(testAnalysisResult.obligations, isNotNull);
         expect(testAnalysisResult.risks, isNotNull);
         expect(testAnalysisResult.paymentTerms, isNotNull);
@@ -315,8 +267,9 @@ void main() {
     group('Performance Considerations', () {
       test('should handle large datasets efficiently', () {
         // Create a large dataset
-        final largeObligations = List.generate(100, (index) => 
-          ObligationEntity(
+        final largeObligations = List.generate(
+          100,
+          (index) => ObligationEntity(
             text: 'Obligation $index',
             party: 'Party $index',
             severity: index % 2 == 0 ? Severity.high : Severity.low,
@@ -324,18 +277,18 @@ void main() {
           ),
         );
 
-        final largeResult = ContractAnalysisResult(obligations: largeObligations);
-        
+        final largeResult = ContractAnalysisResultModel(obligations: largeObligations);
+
         // Verify large dataset was created properly
         expect(largeResult.obligations?.length, equals(100));
         expect(largeResult.obligations?.first.text, equals('Obligation 0'));
         expect(largeResult.obligations?.last.text, equals('Obligation 99'));
-        
+
         // Test performance by measuring instantiation time
         final stopwatch = Stopwatch()..start();
         final exportServiceForLargeData = ExportService(mockLoggingService);
         stopwatch.stop();
-        
+
         expect(exportServiceForLargeData, isA<ExportService>());
         expect(stopwatch.elapsedMilliseconds, lessThan(100)); // Should be fast
       });

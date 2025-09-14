@@ -5,13 +5,12 @@ import 'package:deal_insights_assistant/src/core/enum/risk_category_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/user_requirements_category.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:flutter/foundation.dart';
 
-import '../entity/contract_analysis_result_entity.dart';
-
 @immutable
-class ContractAnalysisResult extends ContractAnalysisResultEntity {
-  const ContractAnalysisResult({
+class ContractAnalysisResultModel extends ContractAnalysisResultEntity {
+  const ContractAnalysisResultModel({
     super.obligations,
     super.paymentTerms,
     super.liabilities,
@@ -23,8 +22,8 @@ class ContractAnalysisResult extends ContractAnalysisResultEntity {
     super.conflictsOrContrasts,
   });
 
-  factory ContractAnalysisResult.fromJson(Map<String, dynamic> json) {
-    return ContractAnalysisResult(
+  factory ContractAnalysisResultModel.fromJson(Map<String, dynamic> json) {
+    return ContractAnalysisResultModel(
       obligations: json['obligations'] != null
           ? (json['obligations'] as List).map((e) => Obligation.fromJson(e)).toList()
           : null,
@@ -82,7 +81,7 @@ class ContractAnalysisResult extends ContractAnalysisResultEntity {
   }
 
   @override
-  ContractAnalysisResult copyWith({
+  ContractAnalysisResultModel copyWith({
     List<ObligationEntity>? obligations,
     List<PaymentTermEntity>? paymentTerms,
     List<LiabilityEntity>? liabilities,
@@ -93,7 +92,7 @@ class ContractAnalysisResult extends ContractAnalysisResultEntity {
     List<UserRequirementEntity>? userRequirements,
     List<ConflictOrContrastEntity>? conflictsOrContrasts,
   }) {
-    return ContractAnalysisResult(
+    return ContractAnalysisResultModel(
       obligations: obligations ?? this.obligations,
       paymentTerms: paymentTerms ?? this.paymentTerms,
       liabilities: liabilities ?? this.liabilities,

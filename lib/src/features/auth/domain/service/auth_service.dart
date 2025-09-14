@@ -1,3 +1,4 @@
+import 'package:deal_insights_assistant/src/features/auth/data/model/user_model.dart';
 import 'package:deal_insights_assistant/src/features/auth/domain/entity/user_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -5,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../core/services/logging_service.dart';
-import '../model/user_model.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 

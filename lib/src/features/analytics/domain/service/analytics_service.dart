@@ -1,17 +1,11 @@
 import 'dart:convert';
 
-import 'package:deal_insights_assistant/src/core/enum/cap_type_enum.dart';
-import 'package:deal_insights_assistant/src/core/enum/likelihood_enum.dart';
-import 'package:deal_insights_assistant/src/core/enum/risk_category_enum.dart';
-import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
-import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/core/utils/strings_util.dart';
+import 'package:deal_insights_assistant/src/features/analytics/data/model/contract_analysis_result_model.dart';
 import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../model/contract_analysis_result_model.dart';
 
 // Service provider
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
@@ -182,7 +176,7 @@ Respond with the JSON object only:''';
 
       // Parse the JSON response
       final jsonResponse = jsonDecode(jsonString);
-      final result = ContractAnalysisResult.fromJson(jsonResponse as Map<String, dynamic>);
+      final result = ContractAnalysisResultModel.fromJson(jsonResponse as Map<String, dynamic>);
 
       stopwatch.stop();
       loggingService.performance('Contract Analysis', stopwatch.elapsed, {
@@ -217,156 +211,5 @@ Respond with the JSON object only:''';
     if (text.trim().split(' ').length < 20) return false;
 
     return true;
-  }
-
-  /// Create a test ContractAnalysisResult for testing purposes
-  /// TODO: Remove this method once real AI integration is working
-  ContractAnalysisResult createTestResult() {
-    return ContractAnalysisResult(
-      obligations: [
-        Obligation(
-          text:
-              "The selected vendor shall be responsible for: 1. Infrastructure Management - 24/7 monitoring of servers, storage, and networking. - Ensuring uptime of at least 99.5% per month. - Implementing automated failover and disaster recovery. 2. Compliance & Security - Compliance with GDPR, HIPAA, and ISO 27001 standards. - Quarterly penetration testing and annual external audits. - Encryption of all data at rest and in transit. 3. Reporting - Monthly performance reports including SLA adherence. - Incident reports within 24 hours of occurrence. - Quarterly strategic review meetings.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "24 months, with two optional one-year extensions",
-          confidence: 0.9,
-        ),
-        Obligation(
-          text: "Vendor must provide detailed invoices with cost breakdowns.",
-          party: "Vendor",
-          severity: Severity.medium,
-          timeframe: "Ongoing",
-          confidence: 0.8,
-        ),
-        Obligation(
-          text: "Vendor agrees not to disclose any confidential information obtained during the course of the project.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "Throughout contract duration",
-          confidence: 0.9,
-        ),
-        Obligation(
-          text: "All employees must sign NDAs before project commencement.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "Before project start",
-          confidence: 0.9,
-        ),
-        Obligation(
-          text: "Vendor must provide an incident response plan within 30 days of contract signing.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "30 days of contract signing",
-          confidence: 0.9,
-        ),
-        Obligation(
-          text: "Upon termination, vendor must return all company data within 15 days.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "15 days of termination",
-          confidence: 0.9,
-        ),
-        Obligation(
-          text: "Proposals must be submitted electronically in PDF format by 25 September 2025.",
-          party: "Vendor",
-          severity: Severity.high,
-          timeframe: "25 September 2025",
-          confidence: 0.95,
-        ),
-      ],
-      paymentTerms: [
-        PaymentTerm(
-          text: "Payment will be made on a net 45 days basis after receipt of invoice.",
-          amount: null,
-          currency: null,
-          dueInDays: 45,
-          severity: Severity.medium,
-          confidence: 0.8,
-        ),
-        PaymentTerm(
-          text: "Late payments beyond 15 days will incur a 5% penalty fee.",
-          amount: null,
-          currency: null,
-          dueInDays: 15,
-          severity: Severity.medium,
-          confidence: 0.8,
-        ),
-        PaymentTerm(
-          text: "Additional services outside scope require written approval and separate invoicing.",
-          amount: null,
-          currency: null,
-          dueInDays: null,
-          severity: Severity.low,
-          confidence: 0.7,
-        ),
-      ],
-      liabilities: [
-        Liability(
-          text: "Vendor shall be liable for direct damages up to 150% of the contract value.",
-          party: "Vendor",
-          capType: CapType.capped,
-          capValue: "150% of the contract value",
-          excludedDamages: ["indirect or consequential damages"],
-          severity: Severity.high,
-          confidence: 0.9,
-        ),
-        Liability(
-          text: "Vendor shall maintain professional indemnity insurance coverage.",
-          party: "Vendor",
-          capType: CapType.uncapped,
-          capValue: null,
-          excludedDamages: [],
-          severity: Severity.medium,
-          confidence: 0.8,
-        ),
-      ],
-      risks: [
-        Risk(
-          text: "Risk of data breach must be mitigated through encryption, access control, and continuous monitoring.",
-          severity: Severity.high,
-          likelihood: Likelihood.medium,
-          category: RiskCategory.operational,
-          confidence: 0.8,
-          riskScore: 6,
-        ),
-        Risk(
-          text: "Breach of confidentiality may result in immediate termination of the contract and legal action.",
-          severity: Severity.critical,
-          likelihood: Likelihood.low,
-          category: RiskCategory.legal,
-          confidence: 0.7,
-          riskScore: 4,
-        ),
-      ],
-      serviceLevels: [
-        ServiceLevel(
-          text: "Ensuring uptime of at least 99.5% per month.",
-          metric: "uptime",
-          target: "99.5%",
-          severity: Severity.high,
-        ),
-      ],
-      intellectualProperty: [],
-      securityRequirements: [
-        SecurityRequirement(
-          text: "Compliance with GDPR, HIPAA, and ISO 27001 standards.",
-          type: SecurityType.compliance,
-          severity: Severity.high,
-        ),
-        SecurityRequirement(
-          text: "Quarterly penetration testing and annual external audits.",
-          type: SecurityType.audit,
-          severity: Severity.high,
-        ),
-        SecurityRequirement(
-          text: "Encryption of all data at rest and in transit.",
-          type: SecurityType.dataProtection,
-          severity: Severity.high,
-        ),
-      ],
-      userRequirements: [],
-      conflictsOrContrasts: [],
-    );
   }
 }

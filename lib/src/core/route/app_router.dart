@@ -1,6 +1,6 @@
 import 'package:deal_insights_assistant/src/core/enum/slide_direction_enum.dart';
 import 'package:deal_insights_assistant/src/core/utils/animation_util.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
+import 'package:deal_insights_assistant/src/features/analytics/data/model/contract_analysis_result_model.dart';
 import 'package:deal_insights_assistant/src/features/auth/presentation/logic/auth_provider.dart';
 import 'package:deal_insights_assistant/src/features/auth/presentation/pages/login_page.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/page/home_page.dart';
@@ -85,12 +85,12 @@ class AppRouter {
         }
 
         final contractAnalysisResultData = extra['contractAnalysisResult'];
-        final ContractAnalysisResult contractAnalysisResult;
+        final ContractAnalysisResultModel contractAnalysisResult;
 
-        if (contractAnalysisResultData is ContractAnalysisResult) {
+        if (contractAnalysisResultData is ContractAnalysisResultModel) {
           contractAnalysisResult = contractAnalysisResultData;
         } else if (contractAnalysisResultData is Map<String, dynamic>) {
-          contractAnalysisResult = ContractAnalysisResult.fromJson(contractAnalysisResultData);
+          contractAnalysisResult = ContractAnalysisResultModel.fromJson(contractAnalysisResultData);
         } else {
           return _buildPageWithTransition<void>(
             context: context,

@@ -1,7 +1,7 @@
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
 import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
-import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result_model.dart';
+import 'package:deal_insights_assistant/src/features/analytics/data/model/contract_analysis_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -20,7 +20,7 @@ class ExportService {
 
   /// Generate and save a professional PDF report of the contract analysis results
   Future<void> exportToPdf({
-    required ContractAnalysisResult analysisResult,
+    required ContractAnalysisResultModel analysisResult,
     required String? fileName,
     String? extractedText,
   }) async {
@@ -135,7 +135,7 @@ class ExportService {
   }
 
   /// Build the summary statistics section
-  pw.Widget _buildSummarySection(pw.Font font, pw.Font fontBold, ContractAnalysisResult result) {
+  pw.Widget _buildSummarySection(pw.Font font, pw.Font fontBold, ContractAnalysisResultModel result) {
     final totalItems = _getTotalItems(result);
     final highSeverityItems = _getHighSeverityItems(result);
     final averageConfidence = _getAverageConfidence(result);
@@ -187,7 +187,7 @@ class ExportService {
   }
 
   /// Build all analysis sections
-  List<pw.Widget> _buildAnalysisSections(pw.Font font, pw.Font fontBold, ContractAnalysisResult result) {
+  List<pw.Widget> _buildAnalysisSections(pw.Font font, pw.Font fontBold, ContractAnalysisResultModel result) {
     final sections = <pw.Widget>[];
 
     if (result.obligations?.isNotEmpty == true) {
@@ -428,7 +428,7 @@ class ExportService {
   }
 
   // Helper methods for calculations
-  int _getTotalItems(ContractAnalysisResult result) {
+  int _getTotalItems(ContractAnalysisResultModel result) {
     return (result.obligations?.length ?? 0) +
         (result.risks?.length ?? 0) +
         (result.paymentTerms?.length ?? 0) +
@@ -440,7 +440,7 @@ class ExportService {
         (result.conflictsOrContrasts?.length ?? 0);
   }
 
-  int _getHighSeverityItems(ContractAnalysisResult result) {
+  int _getHighSeverityItems(ContractAnalysisResultModel result) {
     int count = 0;
     result.obligations?.forEach((item) {
       if (item.severity.name == 'high' || item.severity.name == 'critical') count++;
@@ -472,7 +472,7 @@ class ExportService {
     return count;
   }
 
-  double _getAverageConfidence(ContractAnalysisResult result) {
+  double _getAverageConfidence(ContractAnalysisResultModel result) {
     double totalConfidence = 0.0;
     int totalItems = 0;
 

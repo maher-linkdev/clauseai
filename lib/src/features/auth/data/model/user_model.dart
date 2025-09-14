@@ -1,6 +1,6 @@
+import 'package:deal_insights_assistant/src/features/auth/domain/entity/user_entity.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
-import '../entity/user_entity.dart';
 
 @immutable
 class UserModel extends UserEntity {
@@ -33,12 +33,8 @@ class UserModel extends UserEntity {
       displayName: json['display_name'] as String?,
       photoURL: json['photo_url'] as String?,
       isAnonymous: json['is_anonymous'] as bool,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      lastSignInAt: json['last_sign_in_at'] != null
-          ? DateTime.parse(json['last_sign_in_at'] as String)
-          : null,
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : null,
+      lastSignInAt: json['last_sign_in_at'] != null ? DateTime.parse(json['last_sign_in_at'] as String) : null,
     );
   }
 

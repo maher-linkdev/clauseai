@@ -1,8 +1,6 @@
 import 'package:deal_insights_assistant/src/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../domain/model/user_model.dart';
-
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
 @immutable
@@ -15,9 +13,9 @@ class AuthState {
   const AuthState({this.status = AuthStatus.initial, this.user, this.errorMessage, this.isLoading = false});
 
   AuthState copyWith({
-    AuthStatus? status, 
-    UserModel? user, 
-    String? errorMessage, 
+    AuthStatus? status,
+    UserEntity? user,
+    String? errorMessage,
     bool? isLoading,
     bool clearErrorMessage = false,
   }) {
