@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/core/utils/strings_util.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +9,20 @@ import '../model/contract_analysis_result.dart';
 
 // Service provider
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
-  return AnalyticsService();
+  final loggingService = ref.watch(loggingServiceProvider);
+  return AnalyticsService(loggingService);
 });
 
 class AnalyticsService {
+  final LoggingService loggingService;
+
+  AnalyticsService(this.loggingService) {
+    // Initialize Firebase App Check for security
+
+    // Initialize Firebase AI model with App Check protection
+    _model = FirebaseAI.googleAI(useLimitedUseAppCheckTokens: true).generativeModel(model: 'gemini-1.5-flash');
+  }
+
   late final GenerativeModel _model;
 
   // JSON Schema for contract analysis response
@@ -95,36 +106,6 @@ class AnalyticsService {
   ]
 }''';
 
-  AnalyticsService() {
-    // Initialize Firebase App Check for security
-
-    // Initialize Firebase AI model with App Check protection
-    _model = FirebaseAI.googleAI(useLimitedUseAppCheckTokens: true).generativeModel(model: 'gemini-1.5-flash');
-  }
-
-  /// Analyze contract or RFP document and return structured result
-  Future<ContractAnalysisResult> analyzeContract(String documentText) async {
-    try {
-      final prompt = _buildContractAnalysisPrompt(documentText);
-      final response = await _model.generateContent([Content.text(prompt)]);
-      print("response summary${response.thoughtSummary}");
-      print("response text ${response.text}");
-      if (response.text == null || response.text!.isEmpty) {
-        throw Exception('No analysis generated from the document');
-      }
-      String jsonString = StringsUtil.cleanJsonResponseString(response.text!);
-
-      // Parse the JSON response
-      final jsonResponse = jsonDecode(jsonString);
-      return ContractAnalysisResult.fromJson(jsonResponse as Map<String, dynamic>);
-    } catch (e) {
-      if (e is FormatException) {
-        throw Exception('Invalid JSON response from AI model: ${e.toString()}');
-      }
-      throw Exception('Failed to analyze contract: ${e.toString()}');
-    }
-  }
-
   /// Build the prompt for contract analysis
   String _buildContractAnalysisPrompt(String documentText) {
     return '''
@@ -161,6 +142,66 @@ Document to analyze:
 $documentText
 
 Respond with the JSON object only:''';
+  }
+
+  /// Analyze contract or RFP document and return structured result
+  Future<ContractAnalysisResult> analyzeContract(String documentText) async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      loggingService.methodEntry('AnalyticsService', 'analyzeContract', {
+        'documentTextLength': documentText.length,
+        'documentPreview': documentText.substring(0, documentText.length > 100 ? 100 : documentText.length),
+      });
+
+      final prompt = _buildContractAnalysisPrompt(documentText);
+      loggingService.info('Sending contract analysis request to Firebase AI');
+
+      final response = await _model.generateContent([Content.text(prompt)]);
+
+      loggingService.info('Received response from Firebase AI');
+      loggingService.debug('Response thought summary: ${response.thoughtSummary ?? 'No summary'}');
+
+      if (response.text == null || response.text!.isEmpty) {
+        loggingService.error('No analysis generated from the document - empty response');
+        throw Exception('No analysis generated from the document');
+      }
+
+      loggingService.debug(
+        'Raw response text received (first 200 chars): ${response.text!.substring(0, response.text!.length > 200 ? 200 : response.text!.length)}',
+      );
+
+      String jsonString = StringsUtil.cleanJsonResponseString(response.text!);
+      loggingService.debug('Cleaned JSON string for parsing');
+
+      // Parse the JSON response
+      final jsonResponse = jsonDecode(jsonString);
+      final result = ContractAnalysisResult.fromJson(jsonResponse as Map<String, dynamic>);
+
+      stopwatch.stop();
+      loggingService.performance('Contract Analysis', stopwatch.elapsed, {
+        'documentLength': documentText.length,
+        'responseLength': response.text!.length,
+        'obligationsCount': result.obligations?.length ?? 0,
+        'risksCount': result.risks?.length ?? 0,
+        'paymentTermsCount': result.paymentTerms?.length ?? 0,
+        'liabilitiesCount': result.liabilities?.length ?? 0,
+      });
+
+      loggingService.methodExit('AnalyticsService', 'analyzeContract', 'Success');
+      return result;
+    } catch (e, stackTrace) {
+      stopwatch.stop();
+      loggingService.error('Contract analysis failed after ${stopwatch.elapsed.inMilliseconds}ms', e, stackTrace);
+
+      if (e is FormatException) {
+        loggingService.businessError('JSON Parsing', 'Invalid JSON response from AI model', e, stackTrace);
+        throw Exception('Invalid JSON response from AI model: ${e.toString()}');
+      }
+
+      loggingService.businessError('Contract Analysis', 'Failed to analyze contract', e, stackTrace);
+      throw Exception('Failed to analyze contract: ${e.toString()}');
+    }
   }
 
   /// Validate if the document text is suitable for contract analysis

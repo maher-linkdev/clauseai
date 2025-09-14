@@ -1,4 +1,5 @@
 import 'package:deal_insights_assistant/src/core/constants/colors_palette.dart';
+import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -20,7 +21,9 @@ class FileUploadSection extends ConsumerWidget {
         if (details.files.isNotEmpty) {
           final file = details.files.first;
           final bytes = await file.readAsBytes();
-          print("fileName ${file.name}");
+          ref
+              .read(loggingServiceProvider)
+              .fileOperation('File dropped via drag and drop', file.name, 'Size: ${bytes.length} bytes');
           await homeNotifier.handleDroppedFile(
             PlatformFile(name: file.name, size: bytes.length, bytes: bytes, path: file.path),
           );

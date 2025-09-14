@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:deal_insights_assistant/src/core/utils/file_validator.dart';
+import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/features/analytics/domain/service/analytics_service.dart';
 import 'package:deal_insights_assistant/src/features/home/domain/service/document_analysis_service.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_state.dart';
@@ -13,14 +14,16 @@ import 'package:go_router/go_router.dart';
 final homeStateProvider = StateNotifierProvider<HomeStateNotifier, HomeState>((ref) {
   final documentService = ref.watch(documentAnalysisServiceProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
-  return HomeStateNotifier(documentService, analyticsService);
+  final loggingService = ref.watch(loggingServiceProvider);
+  return HomeStateNotifier(documentService, analyticsService, loggingService);
 });
 
 class HomeStateNotifier extends StateNotifier<HomeState> {
   final DocumentAnalysisService _documentService;
   final AnalyticsService _analyticsService;
+  final LoggingService _loggingService;
 
-  HomeStateNotifier(this._documentService, this._analyticsService) : super(const HomeState());
+  HomeStateNotifier(this._documentService, this._analyticsService, this._loggingService) : super(const HomeState());
 
   // Update text input
   void updateTextInput(String text) {
@@ -51,6 +54,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
         await _validateAndSetFile(file);
       }
     } catch (e) {
+      _loggingService.error('Failed to pick file: ${e.toString()}');
       state = state.copyWith(errorMessage: 'Failed to pick file: ${e.toString()}', uploadStatus: UploadStatus.error);
     }
   }
@@ -60,6 +64,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
     try {
       await _validateAndSetFile(file);
     } catch (e) {
+      _loggingService.error('Failed to handle dropped file: ${e.toString()}');
       state = state.copyWith(
         errorMessage: 'Failed to handle dropped file: ${e.toString()}',
         uploadStatus: UploadStatus.error,
@@ -72,6 +77,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
     final String? error = FileValidator.validateFile(fileName: file.name, fileSize: file.size, fileBytes: file.bytes!);
 
     if (error != null) {
+      _loggingService.error('Invalid file: $error');
       state = state.copyWith(errorMessage: error, uploadStatus: UploadStatus.error);
     } else {
       state = state.copyWith(
@@ -88,7 +94,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
   // Clear selection
   void clearSelection() {
-    print('clearSelection');
+    _loggingService.info('Clearing selection');
     state = state.copyWith(
       fileBytes: null,
       selectedText: null,
@@ -107,50 +113,51 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
   Future<void> analyzeDocument(GoRouter router) async {
     if (!state.hasInput) return;
 
-    //  try {
-    state = state.copyWith(uploadStatus: UploadStatus.analyzing, errorMessage: null);
+    try {
+      state = state.copyWith(uploadStatus: UploadStatus.analyzing, errorMessage: null);
 
-    String extractedText = '';
+      String extractedText = '';
 
-    if (state.hasSelectedFile) {
-      // Extract text from file
-      extractedText = await _documentService.extractTextFromBytes(state.fileBytes!, state.selectedFileName!);
-      print("extractedText $extractedText");
-      if (!_documentService.isValidExtractedText(extractedText)) {
-        throw Exception('No readable text found in the document');
+      if (state.hasSelectedFile) {
+        // Extract text from file
+        extractedText = await _documentService.extractTextFromBytes(state.fileBytes!, state.selectedFileName!);
+        _loggingService.info('Extracted text from file: $extractedText');
+        if (!_documentService.isValidExtractedText(extractedText)) {
+          throw Exception('No readable text found in the document');
+        }
+      } else if (state.hasSelectedText) {
+        // Use the provided text
+        extractedText = state.selectedText!;
       }
-    } else if (state.hasSelectedText) {
-      // Use the provided text
-      extractedText = state.selectedText!;
-    }
 
-    // Validate text for contract analysis
-    if (!_analyticsService.isValidForAnalysis(extractedText)) {
-      throw Exception(
-        'Document text is too short or invalid for contract analysis. Please provide a more substantial document.',
+      // Validate text for contract analysis
+      if (!_analyticsService.isValidForAnalysis(extractedText)) {
+        throw Exception(
+          'Document text is too short or invalid for contract analysis. Please provide a more substantial document.',
+        );
+      }
+
+      // Perform contract analysis
+      final contractAnalysisResult = await _analyticsService.analyzeContract(extractedText);
+
+      state = state.copyWith(uploadStatus: UploadStatus.completed, extractedText: extractedText, errorMessage: null);
+
+      // Navigate to result page with the analysis result
+      router.pushNamed(
+        ResultPage.routeName,
+        extra: {
+          'contractAnalysisResult': contractAnalysisResult,
+          'extractedText': extractedText,
+          'fileName': state.selectedFileName,
+        },
+      );
+    } catch (e) {
+      _loggingService.error('Analysis failed: ${e.toString()}');
+      state = state.copyWith(
+        uploadStatus: UploadStatus.error,
+        errorMessage: 'Analysis failed: ${e.toString()}'
       );
     }
-
-    // Perform contract analysis
-    final contractAnalysisResult = await _analyticsService.analyzeContract(extractedText);
-
-    state = state.copyWith(uploadStatus: UploadStatus.completed, extractedText: extractedText, errorMessage: null);
-
-    // Navigate to result page with the analysis result
-    router.pushNamed(
-      ResultPage.routeName,
-      extra: {
-        'contractAnalysisResult': contractAnalysisResult,
-        'extractedText': extractedText,
-        'fileName': state.selectedFileName,
-      },
-    );
-    // } catch (e) {
-    //   state = state.copyWith(
-    //     uploadStatus: UploadStatus.error,
-    //     errorMessage: 'Analysis failed: ${e.toString()}'
-    //   );
-    // }
   }
 
   // Reset error state

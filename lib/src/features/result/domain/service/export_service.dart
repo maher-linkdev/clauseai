@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:deal_insights_assistant/src/core/constants/app_constants.dart';
+import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/features/analytics/domain/model/contract_analysis_result.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -10,24 +10,45 @@ import 'package:printing/printing.dart';
 
 // Service provider
 final exportServiceProvider = Provider<ExportService>((ref) {
-  return ExportService();
+  final loggingService = ref.watch(loggingServiceProvider);
+  return ExportService(loggingService);
 });
 
 class ExportService {
+  final LoggingService _loggingService;
+
+  ExportService(this._loggingService);
+
   /// Generate and save a professional PDF report of the contract analysis results
   Future<void> exportToPdf({
     required ContractAnalysisResult analysisResult,
     required String? fileName,
     String? extractedText,
   }) async {
+    final stopwatch = Stopwatch()..start();
+    
     try {
+      _loggingService.methodEntry('ExportService', 'exportToPdf', {
+        'fileName': fileName,
+        'hasExtractedText': extractedText != null,
+        'obligationsCount': analysisResult.obligations?.length ?? 0,
+        'risksCount': analysisResult.risks?.length ?? 0,
+        'paymentTermsCount': analysisResult.paymentTerms?.length ?? 0,
+        'liabilitiesCount': analysisResult.liabilities?.length ?? 0,
+      });
+
+      _loggingService.info('Starting PDF generation for contract analysis report');
+      
       final pdf = pw.Document();
 
       // Load custom font for better typography
+      _loggingService.debug('Loading custom fonts for PDF');
       final font = await PdfGoogleFonts.latoRegular();
       final fontBold = await PdfGoogleFonts.latoBold();
+      _loggingService.debug('Fonts loaded successfully');
 
       // Generate PDF pages
+      _loggingService.debug('Building PDF content structure');
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
@@ -44,13 +65,39 @@ class ExportService {
         ),
       );
 
+      _loggingService.debug('PDF content built successfully, preparing for save/print');
+
       // Save and open the PDF
+      final pdfFileName = 'Contract_Analysis_Report_${DateTime.now().millisecondsSinceEpoch}.pdf';
       await Printing.layoutPdf(
         onLayout: (format) async => pdf.save(),
-        name: 'Contract_Analysis_Report_${DateTime.now().millisecondsSinceEpoch}.pdf',
+        name: pdfFileName,
       );
-    } catch (e) {
-      throw Exception('Failed to generate PDF: ${e.toString()}');
+
+      stopwatch.stop();
+      _loggingService.performance('PDF Export', stopwatch.elapsed, {
+        'fileName': pdfFileName,
+        'totalItems': _getTotalItems(analysisResult),
+        'pdfPages': 1, // MultiPage will handle pagination automatically
+      });
+
+      _loggingService.info('PDF export completed successfully: $pdfFileName');
+      _loggingService.methodExit('ExportService', 'exportToPdf', 'Success');
+    } catch (e, stackTrace) {
+      stopwatch.stop();
+      _loggingService.error('PDF export failed after ${stopwatch.elapsed.inMilliseconds}ms', e, stackTrace);
+      
+      // Provide more specific error messages based on error type
+      if (e.toString().contains('font')) {
+        _loggingService.businessError('PDF Font Loading', 'Failed to load required fonts for PDF generation', e, stackTrace);
+        throw Exception('Failed to load PDF fonts. Please check your internet connection and try again.');
+      } else if (e.toString().contains('layout') || e.toString().contains('printing')) {
+        _loggingService.businessError('PDF Layout/Printing', 'Failed to layout or print PDF document', e, stackTrace);
+        throw Exception('Failed to generate or display PDF. Please try again or check your system permissions.');
+      } else {
+        _loggingService.businessError('PDF Generation', 'General PDF generation failure', e, stackTrace);
+        throw Exception('Failed to generate PDF: ${e.toString()}');
+      }
     }
   }
 
@@ -297,6 +344,7 @@ class ExportService {
         confidence = item.confidence;
       }
     } catch (e) {
+      _loggingService.error('Error checking confidence property', e);
       hasConfidence = false;
     }
 
