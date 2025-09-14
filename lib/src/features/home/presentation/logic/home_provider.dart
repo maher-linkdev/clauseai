@@ -29,8 +29,19 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
   void updateTextInput(String text) {
     state = state.copyWith(
       textInput: text,
-      selectedText: text.isNotEmpty ? text : null,
-      inputSource: text.isNotEmpty ? InputSource.text : InputSource.none,
+      errorMessage: null,
+    );
+  }
+
+  // Set text as selected for analysis
+  void setSelectedText(String text) {
+    state = state.copyWith(
+      selectedText: text,
+      textInput: text,
+      inputSource: InputSource.text,
+      fileBytes: null, // Clear any existing file
+      selectedFileName: null,
+      uploadStatus: UploadStatus.idle,
       errorMessage: null,
     );
   }

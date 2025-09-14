@@ -6,6 +6,7 @@ import 'package:deal_insights_assistant/src/features/auth/presentation/pages/log
 import 'package:deal_insights_assistant/src/features/home/presentation/component/error_display.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/file_upload_section.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/selected_file_display.dart';
+import 'package:deal_insights_assistant/src/features/home/presentation/component/selected_text_display.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/component/text_input_section.dart';
 import 'package:deal_insights_assistant/src/features/home/presentation/logic/home_provider.dart';
 import 'package:flutter/material.dart';
@@ -116,7 +117,9 @@ class HomePage extends ConsumerWidget {
 
                     // Upload Options - Responsive Layout
                     homeState.hasInput
-                        ? const SelectedFileDisplay()
+                        ? (homeState.hasSelectedFile 
+                            ? const SelectedFileDisplay()
+                            : const SelectedTextDisplay())
                         : LayoutBuilder(
                             builder: (context, constraints) {
                               final isWideScreen = ResponsiveBreakpoints.of(context).largerThan(TABLET);

@@ -301,8 +301,16 @@ void main() {
       test('should maintain state consistency during operations', () async {
         // Test that state transitions are atomic and consistent
         const inputText = 'Valid contract text for analysis.';
+        
+        // First update text input (typing)
         notifier.updateTextInput(inputText);
+        expect(notifier.state.textInput, equals(inputText));
+        expect(notifier.state.selectedText, isNull); // Not selected yet, just typed
+        expect(notifier.state.inputSource, equals(InputSource.none));
+        expect(notifier.state.hasInput, isFalse);
 
+        // Then set as selected text for analysis
+        notifier.setSelectedText(inputText);
         expect(notifier.state.textInput, equals(inputText));
         expect(notifier.state.selectedText, equals(inputText));
         expect(notifier.state.inputSource, equals(InputSource.text));
@@ -310,7 +318,6 @@ void main() {
 
         // Clear and verify all related fields are cleared
         notifier.clearSelection();
-
         expect(notifier.state.textInput, equals(''));
         expect(notifier.state.selectedText, isNull);
         expect(notifier.state.inputSource, equals(InputSource.none));

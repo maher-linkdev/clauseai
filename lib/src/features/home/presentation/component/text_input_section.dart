@@ -3,7 +3,6 @@ import 'package:deal_insights_assistant/src/features/home/presentation/logic/hom
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:go_router/go_router.dart';
 
 class TextInputSection extends ConsumerStatefulWidget {
   const TextInputSection({super.key});
@@ -14,17 +13,28 @@ class TextInputSection extends ConsumerStatefulWidget {
 
 class _TextInputSectionState extends ConsumerState<TextInputSection> {
   late TextEditingController _textController;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController();
+    _focusNode.addListener(_onFocusChange);
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
     _textController.dispose();
     super.dispose();
+  }
+
+  void _onFocusChange() {
+    // Update state when losing focus
+    if (!_focusNode.hasFocus) {
+      ref.read(homeStateProvider.notifier).updateTextInput(_textController.text);
+    }
   }
 
   @override
@@ -33,8 +43,8 @@ class _TextInputSectionState extends ConsumerState<TextInputSection> {
     final homeNotifier = ref.read(homeStateProvider.notifier);
     final theme = Theme.of(context);
 
-    // Sync controller with state
-    if (_textController.text != homeState.textInput) {
+    // Only sync controller from state if the text is different and we're not focused
+    if (_textController.text != homeState.textInput && !_focusNode.hasFocus) {
       _textController.text = homeState.textInput;
     }
 
@@ -49,52 +59,41 @@ class _TextInputSectionState extends ConsumerState<TextInputSection> {
           children: [
             Row(
               children: [
-                Icon(PhosphorIcons.textT(PhosphorIconsStyle.regular), color: ColorsPalette.primary),
+                Icon(PhosphorIcons.textAa(PhosphorIconsStyle.regular), 
+                     color: ColorsPalette.primary),
                 const SizedBox(width: 12),
-                Text('Paste Contract Text', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                Text('Or enter contract text', 
+                     style: theme.textTheme.titleMedium),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Expanded(
-              child: TextFormField(
+              child: TextField(
                 controller: _textController,
+                focusNode: _focusNode,
                 maxLines: null,
                 expands: true,
-                textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
                   hintText: 'Paste your contract text here...',
-                  filled: true,
-                  fillColor: ColorsPalette.grey400,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: ColorsPalette.primary, width: 2),
-                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.all(16),
                 ),
                 onChanged: (value) {
-                  homeNotifier.updateTextInput(value);
+                  // Update state in real-time
+                  ref.read(homeStateProvider.notifier).updateTextInput(value);
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                onPressed: homeState.hasSelectedText && !homeState.isProcessing
-                    ? () => homeNotifier.analyzeDocument(GoRouter.of(context))
-                    : null,
-                icon: homeState.isProcessing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Icon(PhosphorIcons.upload(PhosphorIconsStyle.regular), size: 20),
-                label: Text(homeState.isProcessing ? 'Analyzing...' : 'Analyze Text'),
-              ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: _textController.text.isEmpty
+                  ? null
+                  : () {
+                      // Update state with current text and set it as selected text
+                      homeNotifier.setSelectedText(_textController.text);
+                    },
+              icon: Icon(PhosphorIcons.arrowRight(PhosphorIconsStyle.regular), size: 20),
+              label: const Text('Continue with Text'),
             ),
           ],
         ),
