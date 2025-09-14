@@ -14,11 +14,17 @@ class AuthState {
 
   const AuthState({this.status = AuthStatus.initial, this.user, this.errorMessage, this.isLoading = false});
 
-  AuthState copyWith({AuthStatus? status, UserModel? user, String? errorMessage, bool? isLoading}) {
+  AuthState copyWith({
+    AuthStatus? status, 
+    UserModel? user, 
+    String? errorMessage, 
+    bool? isLoading,
+    bool clearErrorMessage = false,
+  }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       isLoading: isLoading ?? this.isLoading,
     );
   }

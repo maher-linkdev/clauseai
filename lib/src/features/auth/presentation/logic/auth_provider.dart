@@ -179,7 +179,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // Clear error state
   void clearError() {
     if (state.hasError) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: null);
+      state = state.copyWith(status: AuthStatus.unauthenticated, clearErrorMessage: true);
     }
   }
 

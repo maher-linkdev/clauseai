@@ -7,6 +7,7 @@ import 'package:deal_insights_assistant/src/core/enum/security_type_enum.dart';
 import 'package:deal_insights_assistant/src/core/enum/severity_enum.dart';
 import 'package:deal_insights_assistant/src/core/services/logging_service.dart';
 import 'package:deal_insights_assistant/src/core/utils/strings_util.dart';
+import 'package:deal_insights_assistant/src/features/analytics/domain/entity/contract_analysis_result_entity.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,15 +21,15 @@ final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
 
 class AnalyticsService {
   final LoggingService loggingService;
+  GenerativeModel? _model;
 
-  AnalyticsService(this.loggingService) {
-    // Initialize Firebase App Check for security
+  AnalyticsService(this.loggingService);
 
-    // Initialize Firebase AI model with App Check protection
-    _model = FirebaseAI.googleAI(useLimitedUseAppCheckTokens: true).generativeModel(model: 'gemini-1.5-flash');
+  // Lazy initialization of Firebase AI model
+  GenerativeModel get model {
+    _model ??= FirebaseAI.googleAI(useLimitedUseAppCheckTokens: true).generativeModel(model: 'gemini-1.5-flash');
+    return _model!;
   }
-
-  late final GenerativeModel _model;
 
   // JSON Schema for contract analysis response
   static const String _contractAnalysisSchema = '''
@@ -150,7 +151,7 @@ Respond with the JSON object only:''';
   }
 
   /// Analyze contract or RFP document and return structured result
-  Future<ContractAnalysisResult> analyzeContract(String documentText) async {
+  Future<ContractAnalysisResultEntity> analyzeContract(String documentText) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -162,7 +163,7 @@ Respond with the JSON object only:''';
       final prompt = _buildContractAnalysisPrompt(documentText);
       loggingService.info('Sending contract analysis request to Firebase AI');
 
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([Content.text(prompt)]);
 
       loggingService.info('Received response from Firebase AI');
       loggingService.debug('Response thought summary: ${response.thoughtSummary ?? 'No summary'}');
