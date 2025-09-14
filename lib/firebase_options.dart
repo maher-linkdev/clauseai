@@ -70,6 +70,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '969900702891',
     projectId: 'clauseai-3f7de',
     storageBucket: 'clauseai-3f7de.firebasestorage.app',
+    iosClientId: '969900702891-tskc3h92gdf676b6vo2v6vkd43pqfg50.apps.googleusercontent.com',
     iosBundleId: 'com.example.dealInsightsAssistant',
   );
 

@@ -12,7 +12,12 @@
           "package_name": "com.example.deal_insights_assistant"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "969900702891-7u9bffcag2l0vcb1vrb4b92bsg16bp0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD8DkCT-V5vZ8EcOTOjdFQ3rx1n9vCPgOo"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969900702891-7u9bffcag2l0vcb1vrb4b92bsg16bp0q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "969900702891-tskc3h92gdf676b6vo2v6vkd43pqfg50.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.dealInsightsAssistant"
+              }
+            }
+          ]
         }
       }
     }
